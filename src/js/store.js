@@ -7,6 +7,8 @@ import { routerMiddleware, connectRouter } from 'connected-react-router';
 import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 
+import auth from './redux/auth';
+
 export const history = createBrowserHistory();
 
 const middleware = [
@@ -22,6 +24,7 @@ export default function configureStore(initialState = {}) {
   return createStore(
     combineReducers({
       router: connectRouter(history),
+      auth,
     }),
     initialState,
     compose(
