@@ -23,7 +23,7 @@ const style = theme => ({
   },
   error: {
     color: theme.palette.common.white,
-    background: theme.palette.error[500],
+    background: theme.palette.error.main,
     borderRadius: theme.spacing(1),
     padding: theme.spacing(2),
     marginTop: theme.spacing(2),

@@ -62,7 +62,7 @@ export function login(username, password) {
       console.error(err);
 
       dispatch({ type: AUTH_FAIL });
-      dispatch({ type: LOGIN_FAIL, error: 'Internal server error.' });
+      dispatch({ type: LOGIN_FAIL, error: err.message || 'Internal server error.' });
     }
   };
 }
