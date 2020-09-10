@@ -14,7 +14,7 @@ export default class Request {
 
   static request = async (method, endpoint, data = {}, auth = false) => {
     try {
-      const authHeader = auth ? `Bearer ${store.get('token')}` : '';
+      const authHeader = auth ? `JWT ${store.get('token')}` : '';
 
       const options = {
         method,
@@ -30,6 +30,12 @@ export default class Request {
       const resp = await fetch(`${globals.API_URL}${endpoint}`, options);
 
       const json = await resp.json();
+
+      if (resp.status === 401) {
+        store.remove('token');
+
+        window.location = '/login';
+      }
 
       if (resp.status >= 400) {
         throw json;

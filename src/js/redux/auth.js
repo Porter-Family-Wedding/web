@@ -4,8 +4,6 @@ import { push } from 'connected-react-router';
 import api from 'js/api';
 
 export const LOADING = 'wedding/auth/loading';
-export const AUTH_SUCCESS = 'wedding/auth/authenticated';
-export const AUTH_FAIL = 'wedding/auth/unauthenticated';
 export const LOGIN_SUCCESS = 'wedding/auth/logged_in';
 export const LOGIN_FAIL = 'wedding/auth/login_fail';
 export const LOGOUT = 'wedding/auth/logout';
@@ -16,14 +14,6 @@ export default function reducer(state = initialState, action) {
   switch (action.type) {
     case LOADING:
       return { ...state, loading: true, error: null };
-    case AUTH_SUCCESS:
-      return {
-        ...state, loading: false, isLoggedIn: true, hasAuthed: true,
-      };
-    case AUTH_FAIL:
-      return {
-        ...state, loading: false, isLoggedIn: false, hasAuthed: true,
-      };
     case LOGIN_SUCCESS:
       return {
         ...state, loading: false, error: null,
@@ -50,9 +40,6 @@ export function login(username, password) {
 
         return;
       }
-
-      dispatch({ type: AUTH_SUCCESS });
-
       store.set('token', resp.token);
 
       dispatch(push('/admin/dashboard'));
@@ -61,25 +48,7 @@ export function login(username, password) {
     } catch (err) {
       console.error(err);
 
-      dispatch({ type: AUTH_FAIL });
       dispatch({ type: LOGIN_FAIL, error: err.message || 'Internal server error.' });
-    }
-  };
-}
-
-export function validateToken() {
-  return async (dispatch) => {
-    dispatch({ type: LOADING });
-
-    try {
-      await api.validateToken();
-
-      dispatch({ type: AUTH_SUCCESS });
-      dispatch(getCurrentUser());
-    } catch (err) {
-      console.error(err);
-
-      dispatch({ type: AUTH_FAIL });
     }
   };
 }
