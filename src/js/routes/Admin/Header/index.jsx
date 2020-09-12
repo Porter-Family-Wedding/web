@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -8,15 +8,15 @@ import Typography from '@material-ui/core/Typography';
 
 import { makeStyles } from '@material-ui/styles';
 
+import { logout } from 'js/redux/auth';
+
 import style from './style';
 
 const useStyles = makeStyles(style);
 
 export default function Header({ elevated }) {
+  const dispatch = useDispatch();
   const classes = useStyles();
-
-  const auth = useSelector((state) => state.auth);
-  const currentUser = useSelector((state) => state.currentUser);
 
   return (
     <Grid item xs={12} className={`${classes.container} ${elevated && classes.elevated}`}>
@@ -26,7 +26,7 @@ export default function Header({ elevated }) {
             Porter & Sipes Wedding
           </Typography>
         </Grid>
-        <Button variant="contained" color="secondary" size="small">
+        <Button variant="contained" color="secondary" size="small" onClick={() => dispatch(logout())}>
           Logout
         </Button>
       </Grid>
