@@ -8,6 +8,7 @@ import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 
 import auth from './redux/auth';
+import entities from './redux/entities';
 
 export const history = createBrowserHistory();
 
@@ -25,6 +26,7 @@ export default function configureStore(initialState = {}) {
     combineReducers({
       router: connectRouter(history),
       auth,
+      entities,
     }),
     initialState,
     compose(
