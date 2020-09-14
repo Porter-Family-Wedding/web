@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import Grid from '@material-ui/core/Grid';
+
+import ModelTable from 'js/common/components/ModelTable';
+import { invites } from 'js/common/models';
 
 import Header from '../Header';
 
 export default function Dashboard() {
-  const dispatch = useDispatch();
 
   return (
     <Grid container>
       <Header elevated />
-      <div>
-        ello!
-      </div>
+      <ModelTable model={invites} />
     </Grid>
   )
 }

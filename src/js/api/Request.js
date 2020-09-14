@@ -47,9 +47,9 @@ export default class Request {
     }
   }
 
-  list = (auth = false) => {
+  list = (auth = false, options) => {
     if (this.calls.includes('list')) {
-      return Request.request('GET', this.endpoint, {}, this.auth || auth);
+      return Request.request('GET', `${this.endpoint}?${new URLSearchParams(options)}`, {}, this.auth || auth);
     }
     throw new RequestException('ListNotValid');
   }

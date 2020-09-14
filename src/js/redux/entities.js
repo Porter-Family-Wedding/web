@@ -7,11 +7,25 @@ export const LOADING = 'wedding/entities/loading';
 export const LOADED = 'wedding/entities/loaded';
 export const LOADING_FAILED = 'wedding/entities/loading_failed';
 
+export const LOADING_TABLE = 'wedding/entities/loading/table';
+export const LOADED_TABLE = 'wedding/entities/loaded/table';
+export const LOADING_TABLE_FAILED = 'wedding/entities/loading_failed/table';
+
 const initialState = {};
 
 // Add a loading state for each of our models
 Object.keys(models).forEach((model) => {
-  initialState[model] = { loading: false };
+  initialState[model] = {
+    loading: false,
+    tableData: {
+      loading: false,
+      total: 0,
+      page: 1,
+      items: [],
+      sortBy: '',
+      search: '',
+    },
+  };
 });
 
 export default function reducer(state = initialState, action) {
@@ -39,8 +53,65 @@ export default function reducer(state = initialState, action) {
     }
     case LOADING_FAILED:
       return { ...state, [action.model]: { ...state[action.model], loading: false, error: action.error, } };
+    case LOADING_TABLE:
+      return {
+        ...state,
+        [action.model]: {
+          ...state[action.model],
+          tableData: {
+            ...state[action.model].tableData,
+            loading: true
+          }
+        }
+      };
+    case LOADED_TABLE:
+      return {
+        ...state,
+        [action.model]: {
+          ...state[action.model],
+          tableData: {
+            ...state[action.model].tableData,
+            loading: false,
+            total: action.total,
+            items: action.items,
+            page: action.page,
+            sortBy: action.sortBy,
+            search: action.search,
+          }
+        }
+      }
+    case LOADING_TABLE_FAILED:
+      return {
+        ...state,
+        [action.model]: {
+          ...state[action.model],
+          tableData: {
+            ...state[action.model].tableData,
+            loading: false,
+            error: action.error,
+          }
+        }
+      };
     default:
       return state;
+  }
+}
+
+export function getById(model, id) {
+  return async (dispatch) => {
+    dispatch({ type: LOADING, model });
+
+    try {
+      const data = await api[model].getById(id);
+
+      const { entities } = normalize(data, models[model].schema);
+
+      dispatch({ type: LOADED, entities });
+    } catch (err) {
+      console.error(err);
+
+      dispatch({ type: LOADING_FAILED, error: err });
+    }
   }
 }
 
@@ -58,6 +129,51 @@ export function list(model) {
       console.error(err);
 
       dispatch({ type: LOADING_FAILED, error: err });
+    }
+  }
+}
+
+export function update(model, id, updates) {
+  return async (dispatch) => {
+    dispatch({ type: LOADING, model });
+
+    try {
+      const data = await api[model].update(id, updates);
+      
+      const { entities } = normalize(data, models[model].schema);
+
+      dispatch({ type: LOADED, entities });
+    } catch (err) {
+      console.error(err);
+
+      dispatch({ type: LOADING_FAILED, error: err });
+    }
+  }
+}
+
+export function getTable(model, opts) {
+  const options = {
+    page: 1,
+    limit: 10,
+    sortBy: 'createdAt:desc',
+    search: '',
+    ...opts,
+  };
+
+  return async (dispatch) => {
+    dispatch({ type: LOADING_TABLE, model });
+
+    try {
+      const { data, count: total } = await api[model].list(true, options);
+
+      const { entities } = normalize(data, [models[model].schema]);
+
+      dispatch({ type: LOADED, model, entities });
+
+      dispatch({ type: LOADED_TABLE, model, items: Object.keys(entities[model]), total, ...options });
+    } catch (err) {
+      console.error(err);
+      dispatch({ type: LOADING_TABLE_FAILED, model, error: err });
     }
   }
 }
