@@ -1,4 +1,5 @@
 import { normalize } from 'normalizr';
+import { push } from 'connected-react-router';
 
 import api from 'js/api';
 import * as models from 'js/common/models';
@@ -22,7 +23,7 @@ Object.keys(models).forEach((model) => {
       total: 0,
       page: 1,
       items: [],
-      sortBy: '',
+      sort_by: '',
       search: '',
     },
   };
@@ -75,7 +76,7 @@ export default function reducer(state = initialState, action) {
             total: action.total,
             items: action.items,
             page: action.page,
-            sortBy: action.sortBy,
+            sort_by: action.sort_by,
             search: action.search,
           }
         }
@@ -151,14 +152,36 @@ export function update(model, id, updates) {
   }
 }
 
-export function getTable(model, opts) {
+export function create(model, data) {
+  return async (dispatch) => {
+    dispatch({ type: LOADING, model });
+
+    try {
+      const resp = await api[model].create(data);
+      
+      const { entities } = normalize(resp, models[model].schema);
+
+      dispatch({ type: LOADED, entities });
+
+      dispatch(push(`/admin/${model}/${resp.id}`));
+    } catch (err) {
+      console.error(err);
+
+      dispatch({ type: LOADING_FAILED, error: err });
+    }
+  }
+}
+
+export function getTable(model, { sortBy, ...passthroughOpts }) {
   const options = {
     page: 1,
     limit: 10,
-    sortBy: 'createdAt:desc',
     search: '',
-    ...opts,
+    sort_by: sortBy || 'createdAt:desc',
+    ...passthroughOpts,
   };
+
+
 
   return async (dispatch) => {
     dispatch({ type: LOADING_TABLE, model });
@@ -170,7 +193,13 @@ export function getTable(model, opts) {
 
       dispatch({ type: LOADED, model, entities });
 
-      dispatch({ type: LOADED_TABLE, model, items: Object.keys(entities[model]), total, ...options });
+      dispatch({
+        type: LOADED_TABLE,
+        model,
+        items: Object.values(data).map(d => d.id.toString()),
+        total,
+        ...options,
+      });
     } catch (err) {
       console.error(err);
       dispatch({ type: LOADING_TABLE_FAILED, model, error: err });

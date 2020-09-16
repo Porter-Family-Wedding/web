@@ -12,7 +12,7 @@ export default function Dashboard() {
   return (
     <Grid container>
       <Header elevated />
-      <ModelTable model={invites} />
+      <ModelTable model={invites} additionalFields={['address.to']} />
     </Grid>
   )
 }

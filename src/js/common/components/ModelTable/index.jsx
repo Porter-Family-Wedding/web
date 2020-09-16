@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
+import { push } from 'connected-react-router';
+import pluralize from 'pluralize';
 
 import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
@@ -13,52 +15,120 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
+import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography'
+
+import Edit from '@material-ui/icons/Edit';
+import Search from '@material-ui/icons/Search';
+import Add from '@material-ui/icons/Add';
 
 import { makeStyles } from '@material-ui/styles';
 
-import { getTable } from 'js/redux/entities';
+import { getTable, create } from 'js/redux/entities';
 
 import styles from './style';
 
 const useStyles = makeStyles(styles);
 
-export default function ModelTable({ model, fields }) {
+export default function ModelTable({ model, additionalFields, excludedFields = ['deletedAt'] }) {
   const classes = useStyles();
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(getTable(model));
-  }, []);
+  const [sortBy, setSortBy] = useState('createdAt:desc');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const refreshTableData = () => {
+    dispatch(getTable(model, { page, limit, sortBy, search }));
+  }
+
+  useEffect(refreshTableData, []);
+
+  useEffect(refreshTableData, [sortBy, search, page, limit]);
 
   const tableData = useSelector((state) => state.entities[model]?.tableData);
 
-  const data = useSelector(
-    (state) =>
-      Object.values(state.entities[model])
-        .filter((entity) => tableData.items.includes(entity?.id?.toString()))
-  );
+  const data = useSelector((state) => tableData.items.map((id) => state.entities[model][id]));
 
-  if (!data.length || !tableData.items.length) {
+  if (tableData.loading) {
     return null;
   }
 
-  const disabledColumns = ['deletedAt'];
+  if (!tableData.items.length) {
+    return (
+      <Grid container justify="center">
+        <Grid item xs={12} className={classes.table}>
+          <Typography variant="h6" align="center">
+            It would appear there are no {model.toString()} yet...
+          </Typography>
+        </Grid>
+
+        <Button
+          variant="contained"
+          size="large"
+          color="secondary"
+          startIcon={<Add />}
+          className={classes.table}
+          onClick={() => dispatch(create(model))}
+        >
+          Create the first {pluralize.singular(model.toString())}
+        </Button>
+      </Grid>
+    )
+  }
 
   const columns = Object.keys(data[0]).filter((key) => {
     if (key.includes('Id')) return false;
 
-    if (disabledColumns.includes(key)) return false;
+    if (excludedFields.includes(key)) return false;
 
     if (Object.keys(model.schema.schema).includes(key)) return false;
 
     return true;
   });
 
-  const [sortedColumn, direction] = tableData.sortBy.split(':');
+  const [sortedColumn, direction] = tableData.sort_by.split(':');
+
+  const toggleSort = (column) => {
+    let isAsc = true;
+
+    if (column === sortedColumn) {
+      isAsc = direction === 'desc';
+    }
+
+    setSortBy(`${column}:${isAsc ? 'asc' : 'desc'}`);
+  }
 
   return (
     <Grid container justify="center" alignItems="center" className={classes.container}>
-      <TableContainer component={Paper}>
+      <Grid item xs={8}>
+        <TextField
+          variant="filled"
+          InputProps={{
+            startAdornment: <InputAdornment position="start"><Search /></InputAdornment>
+          }}
+          fullWidth
+          size="small"
+        />
+      </Grid>
+      <Grid item xs={4}>
+        <Grid container justify="flex-end">
+          <Button
+            variant="contained"
+            size="large"
+            color="secondary"
+            startIcon={<Add />}
+            onClick={() => dispatch(create(model))}
+          >
+            New {pluralize.singular(model.toString())}
+          </Button>
+        </Grid>
+      </Grid>
+      <TableContainer component={Paper} className={classes.table}>
         <Table>
           <TableHead>
             <TableRow>
@@ -71,12 +141,14 @@ export default function ModelTable({ model, fields }) {
                     <TableSortLabel
                       active={sortedColumn === column}
                       direction={sortedColumn === column ? direction : 'asc'}
+                      onClick={() => toggleSort(column)}
                     >
                       {column}
                     </TableSortLabel>
                   </TableCell>
                 ))
               }
+              <TableCell />
             </TableRow>
           </TableHead>
           <TableBody>
@@ -98,6 +170,11 @@ export default function ModelTable({ model, fields }) {
                       return <TableCell key={`${model}-${data.id}-${column}`}>{content}</TableCell>;
                     })
                   }
+                  <TableCell>
+                    <IconButton onClick={() => dispatch(push(`/admin/${model}/${data.id}`))}>
+                      <Edit />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))
             }
