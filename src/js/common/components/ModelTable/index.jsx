@@ -28,6 +28,7 @@ import Add from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/styles';
 
 import { getTable, create } from 'js/redux/entities';
+import useDebounce from 'js/hooks/useDebounce';
 
 import styles from './style';
 
@@ -41,6 +42,13 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [columns, setColumns] = useState([]);
+
+  const debouncedSearch = useDebounce(search, 300);
+
+  const tableData = useSelector((state) => state.entities[model]?.tableData);
+
+  const data = useSelector((state) => tableData.items.map((id) => state.entities[model][id]));
 
   const refreshTableData = () => {
     dispatch(getTable(model, { page, limit, sortBy, search }));
@@ -48,17 +56,29 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
 
   useEffect(refreshTableData, []);
 
-  useEffect(refreshTableData, [sortBy, search, page, limit]);
+  useEffect(refreshTableData, [sortBy, debouncedSearch, page, limit]);
 
-  const tableData = useSelector((state) => state.entities[model]?.tableData);
+  useEffect(() => {
+    if (data[0] && !columns.length) {
+      setColumns(Object.keys(data[0]).filter((key) => {
+        if (key.includes('Id')) return false;
+    
+        if (excludedFields.includes(key)) return false;
+    
+        if (Object.keys(model.schema.schema).includes(key)) return false;
+    
+        return true;
+      }));
 
-  const data = useSelector((state) => tableData.items.map((id) => state.entities[model][id]));
+      console.log('HERE', columns);
+    }
+  }, [data]);
 
-  if (tableData.loading) {
+  if (tableData.loading && !tableData.items.length) {
     return null;
   }
 
-  if (!tableData.items.length) {
+  if (!tableData.items.length && !columns) {
     return (
       <Grid container justify="center">
         <Grid item xs={12} className={classes.table}>
@@ -80,16 +100,6 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
       </Grid>
     )
   }
-
-  const columns = Object.keys(data[0]).filter((key) => {
-    if (key.includes('Id')) return false;
-
-    if (excludedFields.includes(key)) return false;
-
-    if (Object.keys(model.schema.schema).includes(key)) return false;
-
-    return true;
-  });
 
   const [sortedColumn, direction] = tableData.sort_by.split(':');
 
@@ -113,6 +123,8 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
           }}
           fullWidth
           size="small"
+          value={search}
+          onChange={({ target: { value } }) => setSearch(value)}
         />
       </Grid>
       <Grid item xs={4}>
@@ -152,6 +164,15 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
             </TableRow>
           </TableHead>
           <TableBody>
+            {
+              !data.length && (
+                <TableRow>
+                  <TableCell>
+                    No results found...
+                  </TableCell>
+                </TableRow>
+              )
+            }
             {
               data.map((data) => (
                 <TableRow key={`${model}-${data.id}`}>
