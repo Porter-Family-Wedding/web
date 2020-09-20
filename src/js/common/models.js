@@ -12,4 +12,5 @@ class Model {
 }
 
 export const addresses = new Model('addresses');
-export const invites = new Model('invites', { address: addresses.schema });
+export const people = new Model('people');
+export const invites = new Model('invites', { address: addresses.schema, people: [people.schema] });

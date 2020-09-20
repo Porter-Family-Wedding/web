@@ -103,7 +103,7 @@ export function getById(model, id) {
     dispatch({ type: LOADING, model });
 
     try {
-      const data = await api[model].getById(id);
+      const data = await api[model].get(id);
 
       const { entities } = normalize(data, models[model].schema);
 

@@ -7,6 +7,7 @@ import Home from './Home';
 import Login from './Login';
 
 import AdminDashboard from './Admin/Dashboard';
+import AdminInvite from './Admin/Invite';
 
 const routes = (
   <>
@@ -16,6 +17,7 @@ const routes = (
 
     {/* Admin Routes */}
     <AuthenticatedRoute exact path="/admin/dashboard" component={AdminDashboard} />
+    <AuthenticatedRoute exact path="/admin/invites/:id" component={AdminInvite} />
   </>
 );
 

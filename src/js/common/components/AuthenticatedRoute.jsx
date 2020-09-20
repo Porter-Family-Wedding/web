@@ -8,7 +8,7 @@ import Loading from 'js/common/components/Loading';
 
 import { logout } from 'js/redux/auth';
 
-function AuthWrapper({ component }) {
+function AuthWrapper({ component, ...props }) {
   const dispatch = useDispatch();
   
   const [loading, setLoading] = useState(true);
@@ -37,11 +37,11 @@ function AuthWrapper({ component }) {
     return <Loading />
   }
 
-  return React.createElement(component);
+  return React.createElement(component, { ...props });
 }
 
 export default function AuthenticatedRoute({ path, component, exact }) {
-  return <Route path={path} exact={exact} render={() => <AuthWrapper component={component} />} />;
+  return <Route path={path} exact={exact} render={({ ...props }) => <AuthWrapper component={component} { ...props } />} />;
 }
 
 AuthenticatedRoute.propTypes = {

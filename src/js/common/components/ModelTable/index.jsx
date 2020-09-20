@@ -69,8 +69,6 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
     
         return true;
       }));
-
-      console.log('HERE', columns);
     }
   }, [data]);
 
@@ -78,7 +76,7 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
     return null;
   }
 
-  if (!tableData.items.length && !columns) {
+  if (!tableData.items.length && !columns.length) {
     return (
       <Grid container justify="center">
         <Grid item xs={12} className={classes.table}>
