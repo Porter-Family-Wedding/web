@@ -196,7 +196,7 @@ export function getTable(model, { sortBy, ...passthroughOpts }) {
       dispatch({
         type: LOADED_TABLE,
         model,
-        items: Object.values(data).map(d => d.id.toString()),
+        items: Object.values(data),
         total,
         ...options,
       });

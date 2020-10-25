@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { push } from 'connected-react-router';
 import pluralize from 'pluralize';
+import { denormalize } from 'normalizr';
 
 import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
@@ -48,7 +49,9 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
 
   const tableData = useSelector((state) => state.entities[model]?.tableData);
 
-  const data = useSelector((state) => tableData.items.map((id) => state.entities[model][id]));
+  const data = useSelector((state) =>
+    denormalize({ [model]: tableData.items }, model.schema, state.entities)[model]
+  );
 
   const refreshTableData = () => {
     dispatch(getTable(model, { page, limit, sortBy, search }));
@@ -60,7 +63,7 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
 
   useEffect(() => {
     if (data[0] && !columns.length) {
-      setColumns(Object.keys(data[0]).filter((key) => {
+      const columnsList = Object.keys(data[0]).filter((key) => {
         if (key.includes('Id')) return false;
     
         if (excludedFields.includes(key)) return false;
@@ -68,7 +71,13 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
         if (Object.keys(model.schema.schema).includes(key)) return false;
     
         return true;
-      }));
+      });
+
+      additionalFields.forEach((_, index) => {
+        columnsList.push(`addtional_field_${index}`);
+      });
+
+      setColumns(columnsList);
     }
   }, [data]);
 
@@ -153,7 +162,7 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
                       direction={sortedColumn === column ? direction : 'asc'}
                       onClick={() => toggleSort(column)}
                     >
-                      {column}
+                      {column.includes('addtional_field') ? additionalFields[column.split('_')[2]][0] : column}
                     </TableSortLabel>
                   </TableCell>
                 ))
@@ -176,7 +185,14 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
                 <TableRow key={`${model}-${data.id}`}>
                   {
                     columns.map((column) => {
+
                       let content = data[column];
+
+                      if (column.includes('addtional_field')) {
+                        const split = additionalFields[column.split('_')[2]][1].split('.');
+
+                        content = data[split[0]][split[1]];
+                      }
 
                       if (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/.test(content)) {
                         content = moment(content).local().format('lll');

@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -12,12 +14,77 @@ import CheckBoxIcon from '@material-ui/icons/CheckBox';
 
 import { makeStyles } from '@material-ui/styles';
 
+import { invites, addresses } from 'js/common/models';
+import { getById, update } from 'js/redux/entities';
+import Loading from 'js/common/components/Loading';
+import useDebouncedFunc from 'js/hooks/useDebouncedFunc';
+
+import People from './People';
+
 import styles from './style';
 
 const useStyles = makeStyles(styles);
 
 export default function Settings() {
+  const dispatch = useDispatch();
   const classes = useStyles();
+
+  const { id } = useParams();
+
+  const invite = useSelector((state) => state.entities.invites[id]);
+  const address = useSelector((state) => state.entities.addresses[invite?.address]);
+
+  const debouncedUpdate = useDebouncedFunc((...args) => dispatch(update(...args)) , 300)
+
+  useEffect(() => {
+    dispatch(getById(invites, id));
+  }, [id]);
+
+  const [sent, setSent] = useState();
+  const [notes, setNotes] = useState();
+
+  const [to, setTo] = useState();
+  const [street, setStreet] = useState();
+  const [suite, setSuite] = useState();
+  const [city, setCity] = useState();
+  const [state, setState] = useState();
+  const [zipCode, setZipCode] = useState();
+
+  useEffect(() => {
+    const newInvite = {
+      sent,
+      notes,
+    };
+
+    const newAddress = {
+      to,
+      street,
+      suite,
+      city,
+      state,
+      zipCode
+    };
+
+    let updateInvite, updateAddress;
+
+    Object.keys(newInvite).forEach((key) => {
+      if (invite?.[key] != newInvite[key]) updateInvite = true;
+    });
+
+    Object.keys(newAddress).forEach((key) => {
+      if (address?.[key] != newAddress[key]) updateAddress = true;
+    });
+
+    if (invite && updateInvite) {
+      debouncedUpdate(invites, id, newInvite);
+    }
+
+    if (address && updateAddress) {
+      debouncedUpdate(addresses, address.id, newAddress);
+    }
+  }, [sent, notes, to, street, suite, city, state, zipCode]);
+
+  if (!invite) return <Loading />;
 
   return (
     <Grid container justify="flex-start" alignItems="center" className={classes.container}>
@@ -25,9 +92,6 @@ export default function Settings() {
         <Grid container justify="space-between">
           <Typography variant="h4">
             Invite Settings
-          </Typography>
-          <Typography variant="button">
-            fancy-code
           </Typography>
         </Grid>
       </Grid>
@@ -40,6 +104,8 @@ export default function Settings() {
                 icon={<CheckBoxOutlineBlankIcon fontSize="medium" />}
                 checkedIcon={<CheckBoxIcon fontSize="medium" />}
                 name="Sent"
+                checked={sent ?? invite?.sent}
+                onChange={({ target: { checked } }) => setSent(checked)}
               />
             }
             label="Sent"
@@ -52,10 +118,11 @@ export default function Settings() {
             control={
               <Checkbox
                 color="primary"
-                icon={<CheckBoxOutlineBlankIcon fontSize="medium" />}
-                checkedIcon={<CheckBoxIcon fontSize="medium" />}
+                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                checkedIcon={<CheckBoxIcon fontSize="small" />}
                 name="viewed"
                 disabled
+                value={invite?.viewed}
               />
             }
             label="Viewed"
@@ -69,13 +136,79 @@ export default function Settings() {
               label="Notes"
               fullWidth
               multiline
-              rows={20}
+              rows={5}
               maxRows={20}
               variant="outlined"
+              value={notes || invite?.notes}
+              onChange={({ target: { value } }) => setNotes(value)}
             />
           </Grid>
         </Paper>
       </Grid>
+      <Grid item xs={12}>
+        <Paper elevation={3} className={classes.paper}>
+          <Grid item xs={12}>
+            <TextField
+              className={classes.field}
+              label="Addressed To"
+              variant="outlined"
+              fullWidth
+              value={to || address?.to}
+              onChange={({ target: { value } }) => setTo(value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              className={classes.field}
+              label="Street"
+              variant="outlined"
+              fullWidth
+              value={street || address?.street}
+              onChange={({ target: { value } }) => setStreet(value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              className={classes.field}
+              label="Suite/Apartment"
+              variant="outlined"
+              fullWidth
+              value={suite}
+              onChange={({ target: { value } }) => setSuite(value)}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container justify="space-between">
+              <TextField
+                className={classes.field}
+                label="City"
+                variant="outlined"
+                value={city || address?.city}
+                onChange={({ target: { value } }) => setCity(value)}
+              />
+              <TextField
+                className={classes.field}
+                label="State"
+                variant="outlined"
+                value={state || address?.state}
+                onChange={({ target: { value } }) => setState(value)}
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <Grid container justify="flex-start">
+              <TextField
+                className={classes.field}
+                label="Zip Code"
+                variant="outlined"
+                value={zipCode || address?.zipCode}
+                onChange={({ target: { value } }) => setZipCode(value)}
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+      </Grid>
+      <People />
     </Grid>
   );
 }
