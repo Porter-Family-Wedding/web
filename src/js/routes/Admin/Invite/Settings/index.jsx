@@ -221,7 +221,7 @@ export default function Settings() {
           </Grid>
         </Paper>
       </Grid>
-      <People />
+      <People peopleIds={invite?.people} />
     </Grid>
   );
 }

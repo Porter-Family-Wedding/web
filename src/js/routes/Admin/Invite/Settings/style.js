@@ -14,6 +14,10 @@ const style = (theme) => ({
     [theme.breakpoints.down('xs')]: {
       width: '100%',
     }
+  },
+  person: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   }
 });
 

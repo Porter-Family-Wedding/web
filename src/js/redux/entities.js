@@ -152,7 +152,7 @@ export function update(model, id, updates) {
   }
 }
 
-export function create(model, data) {
+export function create(model, data, redirect = true) {
   return async (dispatch) => {
     dispatch({ type: LOADING, model });
 
@@ -163,7 +163,7 @@ export function create(model, data) {
 
       dispatch({ type: LOADED, entities });
 
-      dispatch(push(`/admin/${model}/${resp.id}`));
+      if (redirect) dispatch(push(`/admin/${model}/${resp.id}`));
     } catch (err) {
       console.error(err);
 

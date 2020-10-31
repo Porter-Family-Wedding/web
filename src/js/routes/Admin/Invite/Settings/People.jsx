@@ -1,4 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
@@ -11,12 +14,25 @@ import Add from '@material-ui/icons/Add';
 
 import { makeStyles } from '@material-ui/styles';
 
+import { create, getById } from 'js/redux/entities';
+import { people as peopleModel, invites } from 'js/common/models';
+
+import Person from './Person';
+
 import styles from './style';
 
 const useStyles = makeStyles(styles);
 
-export default function InviteSettingsPeople({ people = ['test'] }) {
+export default function InviteSettingsPeople({ peopleIds }) {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const { id: inviteId } = useParams();
+
+  const newPerson = async () => {
+    await dispatch(create(peopleModel, { inviteId }, false));
+    await dispatch(getById(invites, inviteId));
+  }
 
   return (
     <Grid item xs={12}>
@@ -27,34 +43,25 @@ export default function InviteSettingsPeople({ people = ['test'] }) {
               People
             </Typography>
             <IconButton>
-              <Add />
+              <Add onClick={newPerson} />
             </IconButton>
           </Grid>
         </Grid>
        {
-         people.map((p) => (
-          <Grid item xs={12}>
-            <Grid container justify="space-between">
-              <TextField
-                label="First Name"
-                variant="outlined"
-              />
-              <TextField
-                label="Last Name"
-                variant="outlined"
-              />
-              <TextField
-                label="Phone Number"
-                variant="outlined"
-              />
-              <IconButton>
-                <Delete />
-              </IconButton>
-            </Grid>
-          </Grid>
-         ))
+         !peopleIds.length && <p>No people found</p>
+       }
+       {
+         peopleIds.map((id) => <Person id={id} />)
        }
       </Paper>
     </Grid>
   );
 }
+
+InviteSettingsPeople.propTypes = {
+  peopleIds: PropTypes.array,
+};
+
+InviteSettingsPeople.defaultProps = {
+  peopleIds: [],
+};
