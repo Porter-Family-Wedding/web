@@ -34,7 +34,7 @@ export default function Settings() {
   const invite = useSelector((state) => state.entities.invites[id]);
   const address = useSelector((state) => state.entities.addresses[invite?.address]);
 
-  const debouncedUpdate = useDebouncedFunc((...args) => dispatch(update(...args)) , 300)
+  const debouncedUpdate = useDebouncedFunc((...args) => dispatch(update(...args)) , 1000)
 
   useEffect(() => {
     dispatch(getById(invites, id));
@@ -49,11 +49,13 @@ export default function Settings() {
   const [city, setCity] = useState();
   const [state, setState] = useState();
   const [zipCode, setZipCode] = useState();
+  const [assumedSizeOfParty, setAssumedSizeOfParty] = useState();
 
   useEffect(() => {
     const newInvite = {
       sent,
       notes,
+      assumedSizeOfParty: assumedSizeOfParty || null,
     };
 
     const newAddress = {
@@ -82,7 +84,7 @@ export default function Settings() {
     if (address && updateAddress) {
       debouncedUpdate(addresses, address.id, newAddress);
     }
-  }, [sent, notes, to, street, suite, city, state, zipCode]);
+  }, [sent, notes, to, street, suite, city, state, zipCode, assumedSizeOfParty]);
 
   if (!invite) return <Loading />;
 
@@ -129,6 +131,17 @@ export default function Settings() {
           />
         </Paper>
       </Grid>
+      <Grid item xs={6} sm={4} md={3}>
+        <Paper elevation={3} className={classes.paper}>
+            <TextField
+              label="Size Of Party"
+              fullWidth
+              variant="outlined"
+              value={assumedSizeOfParty ?? (invite?.sizeOfParty || invite?.assumedSizeOfParty)}
+              onChange={({ target: { value } }) => setAssumedSizeOfParty(value)}
+            />
+        </Paper>
+      </Grid>
       <Grid item xs={12}>
         <Paper elevation={3} className={classes.paper}>
           <Grid item xs={12}>
@@ -139,7 +152,7 @@ export default function Settings() {
               rows={5}
               maxRows={20}
               variant="outlined"
-              value={notes || invite?.notes}
+              value={notes ?? invite?.notes}
               onChange={({ target: { value } }) => setNotes(value)}
             />
           </Grid>
@@ -153,7 +166,7 @@ export default function Settings() {
               label="Addressed To"
               variant="outlined"
               fullWidth
-              value={to || address?.to}
+              value={to ?? address?.to}
               onChange={({ target: { value } }) => setTo(value)}
             />
           </Grid>
@@ -163,7 +176,7 @@ export default function Settings() {
               label="Street"
               variant="outlined"
               fullWidth
-              value={street || address?.street}
+              value={street ?? address?.street}
               onChange={({ target: { value } }) => setStreet(value)}
             />
           </Grid>
@@ -183,14 +196,14 @@ export default function Settings() {
                 className={classes.field}
                 label="City"
                 variant="outlined"
-                value={city || address?.city}
+                value={city ?? address?.city}
                 onChange={({ target: { value } }) => setCity(value)}
               />
               <TextField
                 className={classes.field}
                 label="State"
                 variant="outlined"
-                value={state || address?.state}
+                value={state ?? address?.state}
                 onChange={({ target: { value } }) => setState(value)}
               />
             </Grid>
@@ -201,7 +214,7 @@ export default function Settings() {
                 className={classes.field}
                 label="Zip Code"
                 variant="outlined"
-                value={zipCode || address?.zipCode}
+                value={zipCode ?? address?.zipCode}
                 onChange={({ target: { value } }) => setZipCode(value)}
               />
             </Grid>
