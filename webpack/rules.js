@@ -27,7 +27,7 @@ module.exports = [
   {
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
     exclude: /(node_modules|bower_components)/,
-    loader: 'react-svg-loader',
+    loader: 'url-loader?limit=10000&mimetype=image/svg',
   },
   {
     test: /\.gif/,

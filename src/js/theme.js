@@ -18,12 +18,20 @@ const theme = createMuiTheme({
       dark: '#cbc693',
       contrastText: '#000',
     },
+    error: {
+      main: '#e1a5a5',
+      contrastText: '#000',
+    },
   },
   background: {
-    paper: '#fff',
+    paper: '#eee',
     default: '#fff',
     text: '#000',
   },
+  typography: {
+    fontFamily: '"Cinzel", serif',
+    fontWeightRegular: 600,
+  }
 });
 
 export default theme;

@@ -30,6 +30,7 @@
     "html-webpack-plugin": "^4.4.1",
     "prop-types": "^15.7.2",
     "react-hot-loader": "^4.12.21",
+    "react-svg-loader": "^3.0.3",
     "url-loader": "^4.1.0",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12",
