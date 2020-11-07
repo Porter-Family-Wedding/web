@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { push } from 'connected-react-router';
 
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -6,6 +8,8 @@ import Button from '@material-ui/core/Button';
 import Paper from '@material-ui/core/Paper';
 
 import { makeStyles } from '@material-ui/styles';
+
+import api from 'js/api';
 
 import RSVP from 'img/rsvp.svg';
 
@@ -15,6 +19,19 @@ const useStyles = makeStyles(styles);
 
 export default function Home() {
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [numberAttending, setNumberAttending] = useState(null);
+
+  const respond = async (attending) => {
+    if (firstName && lastName) {
+      await api.sendResponse({ firstName, lastName, numberAttending, attending });
+
+      await dispatch(push('/thank-you'));
+    }
+  }
 
   return (
     <Grid container justify="center" alignItems="center" className={classes.container}>
@@ -41,6 +58,8 @@ export default function Home() {
                 <TextField
                   variant="outlined"
                   fullWidth
+                  value={firstName}
+                  onChange={({ target: { value } }) => setFirstName(value)}
                 />
               </Grid>
               <Grid item xs={12} md={6} className={classes.textField}>
@@ -48,6 +67,7 @@ export default function Home() {
                 <TextField
                   variant="outlined"
                   fullWidth
+                  onChange={({ target: { value } }) => setLastName(value)}
                 />
               </Grid>
               <Grid item xs={12} className={classes.textField}>
@@ -56,15 +76,16 @@ export default function Home() {
                 <TextField
                   variant="outlined"
                   type="number"
+                  onChange={({ target: { value } }) => setNumberAttending(value)}
                 />
               </Grid>
               
               <Grid item xs={12} className={classes.textField}>
                 How will you celebrate?
-                <Button fullWidth variant="contained" color="primary" className={classes.button}>
+                <Button fullWidth variant="contained" color="primary" className={classes.button} onClick={() => respond(true)}>
                   In Person
                 </Button>
-                <Button fullWidth variant="contained" color="error" className={classes.error}>
+                <Button fullWidth variant="contained" color="error" className={classes.error} onClick={() => respond(false)}>
                   From Afar
                 </Button>
               </Grid>
