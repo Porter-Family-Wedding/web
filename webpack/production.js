@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HappyPack = require('HappyPack');
+const HappyPack = require('happypack');
 
 const rules = require('./rules');
 
@@ -10,7 +10,7 @@ module.exports = {
   entry: { main: './src/js/main.js' },
   output: {
     publicPath: '/',
-    path: path.join(process.cwd(), 'dist'),
+    path: path.join(process.cwd(), 'build'),
     filename: '[name].js',
   },
   resolve: {
