@@ -1,0 +1,30 @@
+name: Production Deploy
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '14.9.0'
+      - run: yarn install
+      - run: yarn build
+        env:
+          API_URL: https://api.porter.family
+      - name: sync
+        run: aws s3 sync --acl public-read ./dist s3://porter.family
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-2
+      - name: invalidate cache
+        run: aws cloudfront create-invalidation --distribution-id E2YD6HBS6UES6H --paths "/*"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.CLOUDFRONT_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFRONT_SECRET_KEY }}
+          AWS_DEFAULT_REGION: us-east-2
