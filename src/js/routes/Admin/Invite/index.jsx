@@ -1,7 +1,11 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { goBack } from 'connected-react-router';
 
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+
+import ChevronLeft from '@material-ui/icons/ChevronLeft';
 
 import { makeStyles } from '@material-ui/styles';
 
@@ -30,6 +34,11 @@ export default function Invite({ match: { params } }) {
       <Header />
       <Grid item xs={12}>
         <Grid container justify="center" alignItems="center" className={classes.container}>
+          <Grid item xs={12}>
+            <Button variant="outlined" startIcon={<ChevronLeft />} onClick={() => dispatch(goBack())}>
+              Go Back
+            </Button>
+          </Grid>
           <Settings />
         </Grid>
       </Grid>

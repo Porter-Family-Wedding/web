@@ -12,7 +12,7 @@ export default function Dashboard() {
   return (
     <Grid container>
       <Header elevated />
-      <ModelTable model={invites} additionalFields={[['addressed to', 'address.to']]} excludedFields={['deletedAt', 'notes']} />
+      <ModelTable model={invites} additionalFields={[['addressed to', 'address.to']]} excludedFields={['deletedAt', 'notes', 'assumedSizeOfParty']} />
     </Grid>
   )
 }

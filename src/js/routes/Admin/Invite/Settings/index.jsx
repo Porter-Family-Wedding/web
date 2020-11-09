@@ -49,13 +49,13 @@ export default function Settings() {
   const [city, setCity] = useState();
   const [state, setState] = useState();
   const [zipCode, setZipCode] = useState();
-  const [assumedSizeOfParty, setAssumedSizeOfParty] = useState();
+  const [sizeOfParty, setSizeOfParty] = useState();
 
   useEffect(() => {
     const newInvite = {
       sent,
       notes,
-      assumedSizeOfParty: assumedSizeOfParty || null,
+      sizeOfParty,
     };
 
     const newAddress = {
@@ -84,7 +84,7 @@ export default function Settings() {
     if (address && updateAddress) {
       debouncedUpdate(addresses, address.id, newAddress);
     }
-  }, [sent, notes, to, street, suite, city, state, zipCode, assumedSizeOfParty]);
+  }, [sent, notes, to, street, suite, city, state, zipCode, sizeOfParty]);
 
   if (!invite) return <Loading />;
 
@@ -137,8 +137,8 @@ export default function Settings() {
               label="Size Of Party"
               fullWidth
               variant="outlined"
-              value={assumedSizeOfParty ?? (invite?.sizeOfParty || invite?.assumedSizeOfParty)}
-              onChange={({ target: { value } }) => setAssumedSizeOfParty(value)}
+              value={sizeOfParty ?? invite?.sizeOfParty}
+              onChange={({ target: { value } }) => setSizeOfParty(value)}
             />
         </Paper>
       </Grid>
