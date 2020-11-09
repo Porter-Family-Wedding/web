@@ -10,7 +10,7 @@ module.exports = {
   entry: { main: './src/js/main.js' },
   output: {
     publicPath: '/',
-    path: path.join(process.cwd(), 'build'),
+    path: path.join(process.cwd(), 'dist'),
     filename: '[name].js',
   },
   resolve: {
