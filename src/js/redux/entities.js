@@ -175,7 +175,7 @@ export function create(model, data, redirect = true) {
 export function getTable(model, { sortBy, ...passthroughOpts }) {
   const options = {
     page: 1,
-    limit: 10,
+    limit: 200,
     search: '',
     sort_by: sortBy || 'createdAt:desc',
     ...passthroughOpts,
