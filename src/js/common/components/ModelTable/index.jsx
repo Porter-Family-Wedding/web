@@ -42,7 +42,7 @@ export default function ModelTable({ model, additionalFields, excludedFields = [
   const [sortBy, setSortBy] = useState('createdAt:desc');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(200);
   const [columns, setColumns] = useState([]);
 
   const debouncedSearch = useDebounce(search, 300);
