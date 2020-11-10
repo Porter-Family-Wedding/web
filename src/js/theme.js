@@ -29,7 +29,7 @@ const theme = createMuiTheme({
     text: '#000',
   },
   typography: {
-    fontFamily: '"Cinzel", serif',
+    fontFamily: '"Crimson Text", serif',
     fontWeightRegular: 600,
   }
 });
