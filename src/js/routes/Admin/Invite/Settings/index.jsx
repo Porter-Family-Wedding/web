@@ -8,6 +8,9 @@ import TextField from '@material-ui/core/TextField';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Typography from '@material-ui/core/Typography';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
 
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
@@ -44,6 +47,7 @@ export default function Settings() {
   const [notes, setNotes] = useState();
 
   const [to, setTo] = useState();
+  const [status, setStatus] = useState();
   const [street, setStreet] = useState();
   const [suite, setSuite] = useState();
   const [city, setCity] = useState();
@@ -56,6 +60,7 @@ export default function Settings() {
       sent,
       notes,
       sizeOfParty,
+      status
     };
 
     const newAddress = {
@@ -64,7 +69,7 @@ export default function Settings() {
       suite,
       city,
       state,
-      zipCode
+      zipCode,
     };
 
     let updateInvite, updateAddress;
@@ -84,7 +89,7 @@ export default function Settings() {
     if (address && updateAddress) {
       debouncedUpdate(addresses, address.id, newAddress);
     }
-  }, [sent, notes, to, street, suite, city, state, zipCode, sizeOfParty]);
+  }, [sent, notes, to, street, suite, city, state, zipCode, sizeOfParty, status]);
 
   if (!invite) return <Loading />;
 
@@ -140,6 +145,21 @@ export default function Settings() {
               value={sizeOfParty ?? invite?.sizeOfParty}
               onChange={({ target: { value } }) => setSizeOfParty(value)}
             />
+        </Paper>
+      </Grid>
+      <Grid item xs={6} sm={4} md={2}>
+        <Paper elevation={3} className={classes.paper}>
+            <InputLabel shrink id="invite-status">
+              Status
+            </InputLabel>
+            <Select
+              labelId="invite-status"
+              value={status ?? invite?.status}
+              onChange={({ target: { value } }) => setStatus(value)}
+            >
+              <MenuItem value={'Accepted'}>Accepted</MenuItem>
+              <MenuItem value={'Rejected'}>Rejected</MenuItem>
+            </Select>
         </Paper>
       </Grid>
       <Grid item xs={12}>
